@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -48,11 +49,17 @@ public class BookServiceImpl implements BookService {
     return list;
   }
 
+  @Transactional(propagation = Propagation.MANDATORY)
+  public Book findBookById(Integer id){
+    return bookRepository.findById(id).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND));
+  }
+  
   @Override
+  @Transactional(propagation = Propagation.REQUIRED)
   public BookResponse getBook(Integer id) {
 
-    Book bookModel = bookRepository.findById(id).orElseThrow(() ->
-      new ResponseStatusException(HttpStatus.NOT_FOUND));
+    Book bookModel = findBookById(id);
 
       log.info("Latest assignment record found !");
 
